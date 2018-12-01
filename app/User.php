@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'bio', 'photo', 'level'
     ];
 
     /**
@@ -32,9 +32,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         parent::boot();
 
-        static::creating(function($user) {
+        static::creating(function ($user) {
             $user->token = str_random(30);
         });
     }
-
 }
