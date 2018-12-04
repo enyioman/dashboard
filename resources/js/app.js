@@ -11,6 +11,17 @@ window.Vue = require('vue');
 import moment from 'moment';
 import { Form, HasError, AlertError } from 'vform'
 
+import swal from 'sweetalert2'
+window.swal = swal; 
+
+const toast = swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000
+  });
+window.toast = toast;
+
 window.Form = Form;
 Vue.component(HasError.name, HasError)
 Vue.component(AlertError.name, AlertError)
@@ -27,6 +38,7 @@ Vue.use(VueProgressBar, {
 
 let routes = [
     { path: '/dashboard', component: require('./components/Dashboard.vue')},
+    { path: '/developer', component: require('./components/Developer.vue')},
     { path: '/profile', component: require('./components/Profile.vue')},
     { path: '/users', component: require('./components/Users.vue')},
     { path: '/admins', component: require('./components/Admins.vue')}
@@ -45,6 +57,9 @@ Vue.filter('myDate', function(date) {
     return moment(date).format('MMM DD, YYYY');
 });
 
+// Event listener
+
+window.Fire = new Vue();
 
 
 /**
@@ -54,6 +69,21 @@ Vue.filter('myDate', function(date) {
  *
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
+
+Vue.component(
+    'passport-clients',
+    require('./components/passport/Clients.vue')
+);
+
+Vue.component(
+    'passport-authorized-clients',
+    require('./components/passport/AuthorizedClients.vue')
+);
+
+Vue.component(
+    'passport-personal-access-tokens',
+    require('./components/passport/PersonalAccessTokens.vue')
+);
 
 Vue.component('example-component', require('./components/ExampleComponent.vue'));
 
