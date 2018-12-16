@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <div class="row mt-5">
+        <div class="row mt-5" v-if="$gate.isAdminOrModerator()">
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
@@ -24,7 +24,7 @@
                     <th>Modify</th>
                     
                   </tr>
-                  <tr v-for="user in users" :key="user.id">
+                  <tr v-for="user in users.data" :key="user.id">
                     <td>{{user.id}}</td>
                     <td>{{user.name}}</td>
                     <td>{{user.email}}</td>
@@ -42,11 +42,17 @@
                 </table>
               </div> 
               <!-- /.card-body -->
+                <div class="card-footer">
+                    <pagination :data="users" @pagination-change-page="getResults"></pagination>
+                </div>
             </div>
             <!-- /.card -->
           </div>
         </div> 
 
+        <div v-if="!$gate.isAdminOrModerator()">
+            <not-found></not-found>
+        </div>
 
         <!-- Modal -->
     <div class="modal fade" id="addNew" tabindex="-1" role="dialog" aria-labelledby="addNewLabel" aria-hidden="true">
@@ -135,6 +141,13 @@
             }
         },
         methods: {
+            getResults(page = 1) {
+                axios.get('api/user?page=' + page)
+                    .then(response => {
+                        this.users = response.data;
+                    });
+            },
+
             updateUser() {
                 this.$Progress.start();
                 this.form.put('api/user/'+this.form.id)
@@ -153,7 +166,7 @@
                     this.$Progress.fail();
                 });
             },
-            editModal(user) {
+            editModal: function (user) {
                 this.editmode = true;
                 this.form.reset();
                 $('#addNew').modal('show');
@@ -191,7 +204,9 @@
                 })
             },
             loadUsers() {
-                axios.get("api/user").then(({ data }) => (this.users = data.data));
+                if (this.$gate.isAdminOrModerator()){
+                    axios.get("api/user").then(({ data }) => (this.users = data));
+                }
             },
             createUser() {
                 this.$Progress.start();
@@ -211,6 +226,16 @@
             }
         },
         mounted() {
+            Fire.$on('searching', () => {
+                let query = this.$parent.search;
+                axios.get('api/findUser?q=' + query)
+                    .then((data) => {
+                        this.users = data.data
+                    })
+                    .catch(() => {
+
+                    })
+            })
             this.loadUsers();
             Fire.$on('AfterCreation', () => {
                 this.loadUsers();

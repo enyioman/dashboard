@@ -1,7 +1,6 @@
 <style>
 .widget-user-header {
-    background-position: center center;
-    background: linear-gradient((246, 41, 12,0.6), (246, 41, 12,0.6));
+    background-position: center center; 
     background-size: cover;
     height: 300px !important;
 }
@@ -17,11 +16,11 @@
                 <div class="card card-widget widget-user mt-3">
                 <!-- Add the bg color to the header using any of the bg-* classes -->
                 <div class="widget-user-header text-white" style="background: linear-gradient(rgba(27, 38, 75, 0.7), rgba(27, 38, 75, 0.9)), url(../img/akwa.jpeg) no-repeat center center; background-size: cover;">
-                    <h3 class="widget-user-username">Elizabeth Pierce</h3>
-                    <h5 class="widget-user-desc">Web Designer</h5>
+                    <h3 class="widget-user-username">{{this.form.name}}</h3>
+                    <h5 class="widget-user-desc">{{this.form.level | upText}}</h5>
                 </div>
                 <div class="widget-user-image">
-                    <img class="img-circle" src="" alt="User Avatar">
+                    <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
                 </div>
                 <div class="card-footer">
                     <div class="row">
@@ -281,28 +280,35 @@
                         <label for="inputName" class="col-sm-2 control-label">Name</label>
 
                         <div class="col-sm-12">
-                          <input v-model="form.name" type="text" class="form-control" id="inputName" placeholder="Name">
+                          <input v-model="form.name" type="text" class="form-control" id="inputName" placeholder="Name" 
+                          :class="{ 'is-invalid': form.errors.has('name') }">
+                          <has-error :form="form" field="name"></has-error>
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="inputEmail" class="col-sm-2 control-label">Email</label>
 
                         <div class="col-sm-12">
-                          <input v-model="form.email" type="email" class="form-control" id="inputEmail" placeholder="Email">
+                          <input v-model="form.email" type="email" class="form-control" id="inputEmail" placeholder="Email" 
+                          :class="{ 'is-invalid': form.errors.has('email') }">
+                          <has-error :form="form" field="email"></has-error>
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="inputName2" class="col-sm-6 control-label">Password (leave empty if not changing)</label>
 
                         <div class="col-sm-12">
-                          <input v-model="form.password" type="text" class="form-control" id="inputName2" placeholder="Password">
+                          <input v-model="form.password" type="text" class="form-control" id="inputName2" placeholder="Password" 
+                          :class="{ 'is-invalid': form.errors.has('password') }">
+                          <has-error :form="form" field="password"></has-error>
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="inputExperience" class="col-sm-2 control-label">Experience</label>
 
                         <div class="col-sm-12">
-                          <textarea v-model="form.bio" class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                          <textarea v-model="form.bio" class="form-control" id="inputExperience" placeholder="Experience" 
+                          :class="{ 'is-invalid': form.errors.has('bio') }"></textarea>
                         </div>
                       </div>
 
@@ -348,23 +354,46 @@
         },
 
         methods: {
+          getProfilePhoto() {
+            let photo = (this.form.photo.length > 200) ? this.form.photo : "img/profile/"+ this.form.photo;
+            return photo;
+          },
+
           updateInfo() {
+            this.$Progress.start();
             this.form.put('api/profile')
             .then(() => {
-
+              swal(
+                  'Updated!',
+                  'Profile updated successfully',
+                  'success'
+              )
+              Fire.$emit('AfterCreation'); 
+              this.$Progress.finish();
             })
             .catch(() => {
-
+              this.$Progress.fail();
             }); 
           },
+
           uploadPhoto(e) {
               let file = e.target.files[0];
+              console.log(file);
               var reader = new FileReader();
-              reader.onloadend = (file) => {
+              if(file['size'] < 2097152) {
+                reader.onloadend = (file) => {
                 //console.log('RESULT', reader.result)
                 this.form.photo = reader.result;
               }
               reader.readAsDataURL(file);
+              } else {
+                  swal({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'You cannot upload a file larger than 2MB',
+                  })
+              }
+              
           }
         },
 
@@ -373,3 +402,4 @@
         }
     }
 </script>
+

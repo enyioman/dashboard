@@ -1,4 +1,6 @@
-  <?php
+<?php
+
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,4 +21,20 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('invoice', function() {
+    return view('invoice');
+});
+
+Route::get('/contact', function () {
+    return view('contact');
+});
+
+Route::post('/contact', function (Request $request) {
+    //
+});
+
 Route::get('{path}', 'HomeController@index')->where('path', '([A-z\d-\/_.]+)?');
+
+
+
+
